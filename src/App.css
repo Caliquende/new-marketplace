@@ -180,31 +180,6 @@ textarea:focus-visible,
   text-transform: uppercase;
 }
 
-.use-case-banner {
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
-  gap: 14px;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 14px 16px;
-  border: 1px solid #e2d8ea;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.use-case-banner span {
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: #ffffff;
-  background: #7b2cbf;
-  font-weight: 900;
-  text-align: center;
-}
-
-.use-case-banner p {
-  color: #5f4e68;
-}
-
 .workspace {
   min-width: 0;
   padding: 28px;
@@ -949,7 +924,6 @@ textarea {
   }
 
   .topbar,
-  .use-case-banner,
   .logo-manager {
     grid-template-columns: 1fr;
     display: grid;

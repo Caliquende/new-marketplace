@@ -126,8 +126,6 @@ function App() {
   const productPageProduct = productSlug ? products.find((product) => slugifyProductTitle(product.title) === productSlug) : null
   const isProductRoute = Boolean(productSlug)
   const pageTitle = productPageProduct?.title ?? (isProductRoute ? t.detail.productNotFound : activePage.title)
-  const pageUseCase = isProductRoute ? t.detail.productPageUseCase : activePage.useCase
-  const currentRouteLabel = isProductRoute ? pathName : routePaths[page]
 
   function navigateTo(path: string) {
     window.history.pushState({}, '', path)
@@ -296,8 +294,6 @@ function App() {
           </div>
         </header>
 
-        <UseCaseBanner path={currentRouteLabel} text={pageUseCase} />
-
         {page === 'musteri' && productSlug && (
           <ProductRoute
             product={productPageProduct}
@@ -388,15 +384,6 @@ function LanguageToggle({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) =
         TR
       </button>
     </div>
-  )
-}
-
-function UseCaseBanner({ path, text }: { path: string; text: string }) {
-  return (
-    <section className="use-case-banner">
-      <span>{path}</span>
-      <p>{text}</p>
-    </section>
   )
 }
 
