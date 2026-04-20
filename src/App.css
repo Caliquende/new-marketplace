@@ -276,13 +276,19 @@ h3 {
   grid-template-columns: minmax(0, 1fr) 340px;
 }
 
+.product-page-grid {
+  grid-template-columns: 1fr;
+}
+
 .full-span,
 .hero-band,
 .customer-hero,
 .category-strip,
 .promo-strip,
 .showcase-band,
-.product-detail {
+.product-detail,
+.empty-state,
+.related-products {
   grid-column: 1 / -1;
 }
 
@@ -586,10 +592,15 @@ textarea {
 .cart-panel,
 .data-panel,
 .metric-card,
-.logo-manager {
+.logo-manager,
+.empty-state {
   border: 1px solid #e2d8ea;
   border-radius: 8px;
   background: #ffffff;
+}
+
+.empty-state {
+  padding: 28px;
 }
 
 .product-card {
@@ -829,6 +840,11 @@ textarea {
   border: 1px solid #d8c9e4;
   border-radius: 8px;
   background: #ffffff;
+}
+
+.related-products {
+  display: grid;
+  gap: 16px;
 }
 
 .detail-media {

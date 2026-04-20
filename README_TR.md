@@ -6,7 +6,7 @@ New Marketplace mor/lila temalı, çok satıcılı B2C marketplace demosudur. Bu
 
 ## Kapsam
 
-- Kampanya slider'ı, kategori navigasyonu, arama, sıralama, favori, karşılaştırma, ürün detay sayfaları, sepet ve sandbox checkout içeren müşteri vitrini.
+- Kampanya slider'ı, kategori navigasyonu, arama, sıralama, favori, karşılaştırma, ayrı ürün detay URL'leri, sepet ve sandbox checkout içeren müşteri vitrini.
 - `public/demo-products` altında tutulan 12 adet lokal PNG demo ürün görseli.
 - Marketplace metrikleri, rol sınırları, provider durumu, audit log ve PNG logo yükleme içeren admin dashboard.
 - Katalog, stok, teslim tipi, performans, kampanya katılımı, komisyon ve hakediş görünürlüğü için satıcı dashboardları.
@@ -33,6 +33,7 @@ Varsayılan lokal adresler:
 
 - `http://localhost:5173` - genel müşteri vitrini
 - `http://localhost:5173/musteri` - müşteri vitrini alias
+- `http://localhost:5173/lilabook-pro-14` - ürün detay sayfası örneği
 - `http://localhost:5173/admin` - admin kontrol dashboardu
 - `http://localhost:5173/satici1` - satıcı katalog ve stok senaryosu
 - `http://localhost:5173/satici2` - satıcı performans ve hakediş senaryosu

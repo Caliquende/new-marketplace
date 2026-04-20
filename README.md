@@ -6,7 +6,7 @@ Turkish documentation is available in [README_TR.md](./README_TR.md).
 
 ## What This Includes
 
-- Customer storefront with campaign slider, category navigation, search, sorting, favorites, comparison, product detail pages, cart, and sandbox checkout.
+- Customer storefront with campaign slider, category navigation, search, sorting, favorites, comparison, dedicated product detail URLs, cart, and sandbox checkout.
 - Local product gallery with 12 PNG demo product images under `public/demo-products`.
 - Admin dashboard with marketplace metrics, role boundaries, provider health, audit log, and PNG logo upload.
 - Seller dashboards for catalog, stock, delivery type, performance, campaign participation, commission, and payout visibility.
@@ -33,6 +33,7 @@ Default local addresses:
 
 - `http://localhost:5173` - public customer storefront
 - `http://localhost:5173/musteri` - customer storefront alias
+- `http://localhost:5173/lilabook-pro-14` - product detail page example
 - `http://localhost:5173/admin` - admin control dashboard
 - `http://localhost:5173/satici1` - seller catalog and stock use-case
 - `http://localhost:5173/satici2` - seller performance and payout use-case

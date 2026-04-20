@@ -29,8 +29,29 @@ function pageFromPath(pathname: string): Page {
   return pages.find((page) => routePaths[page] === normalizedPath) ?? 'musteri'
 }
 
+function productSlugFromPath(pathname: string) {
+  const normalizedPath = pathname.replace(/\/+$/, '') || '/'
+  const knownPaths = ['/', ...Object.values(routePaths)]
+  if (knownPaths.includes(normalizedPath)) return null
+
+  return decodeURIComponent(normalizedPath.slice(1))
+}
+
+function slugifyProductTitle(title: string) {
+  return title
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('en-US')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function productPath(product: Product) {
+  return `/${slugifyProductTitle(product.title)}`
+}
+
 function App() {
-  const [page, setPage] = useState<Page>(() => pageFromPath(window.location.pathname))
+  const [pathName, setPathName] = useState(() => window.location.pathname)
   const [lang, setLang] = useState<Lang>('en')
   const [data, setData] = useState<MarketplaceData | null>(null)
   const [query, setQuery] = useState('')
@@ -40,12 +61,13 @@ function App() {
   const [favorites, setFavorites] = useState<string[]>(['p-1003'])
   const [compare, setCompare] = useState<string[]>([])
   const [checkoutStatus, setCheckoutStatus] = useState<string>(copy.en.store.checkoutWaiting)
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
   const [adminLogo, setAdminLogo] = useState(() => localStorage.getItem('adminLogo') || '')
   const [marketingLogo, setMarketingLogo] = useState(() => localStorage.getItem('marketingLogo') || '')
   const [logoError, setLogoError] = useState('')
 
   const t = copy[lang]
+  const page = useMemo(() => pageFromPath(pathName), [pathName])
+  const productSlug = productSlugFromPath(pathName)
   const activePage = t.pages[page]
   const money = useMemo(
     () =>
@@ -62,7 +84,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const handlePopState = () => setPage(pageFromPath(window.location.pathname))
+    const handlePopState = () => setPathName(window.location.pathname)
     window.addEventListener('popstate', handlePopState)
 
     return () => window.removeEventListener('popstate', handlePopState)
@@ -101,6 +123,32 @@ function App() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const selectedCompare = products.filter((product) => compare.includes(product.id))
   const isCustomerPage = page === 'musteri'
+  const productPageProduct = productSlug ? products.find((product) => slugifyProductTitle(product.title) === productSlug) : null
+  const isProductRoute = Boolean(productSlug)
+  const pageTitle = productPageProduct?.title ?? (isProductRoute ? t.detail.productNotFound : activePage.title)
+  const pageUseCase = isProductRoute ? t.detail.productPageUseCase : activePage.useCase
+  const currentRouteLabel = isProductRoute ? pathName : routePaths[page]
+
+  function navigateTo(path: string) {
+    window.history.pushState({}, '', path)
+    setPathName(window.location.pathname)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function openProduct(product: Product) {
+    navigateTo(productPath(product))
+  }
+
+  function openStorefront() {
+    navigateTo('/')
+  }
+
+  function selectCategory(nextCategory: string) {
+    setCategory(nextCategory)
+    if (isProductRoute) {
+      openStorefront()
+    }
+  }
 
   function addToCart(product: Product) {
     setCart((current) => {
@@ -203,7 +251,7 @@ function App() {
               <button
                 key={item}
                 className={category === item ? 'active' : ''}
-                onClick={() => setCategory(item)}
+                onClick={() => selectCategory(item)}
                 type="button"
               >
                 <span className="nav-dot" aria-hidden="true" />
@@ -232,7 +280,7 @@ function App() {
             <span className="eyebrow">
               {activePage.group} {t.useCaseLabel}
             </span>
-            <h1>{activePage.title}</h1>
+            <h1>{pageTitle}</h1>
           </div>
           <div className="topbar-actions">
             <div className="signal">
@@ -248,12 +296,27 @@ function App() {
           </div>
         </header>
 
-        <UseCaseBanner path={routePaths[page]} text={activePage.useCase} />
+        <UseCaseBanner path={currentRouteLabel} text={pageUseCase} />
 
-        {page === 'musteri' && (
+        {page === 'musteri' && productSlug && (
+          <ProductRoute
+            product={productPageProduct}
+            products={products}
+            favorites={favorites}
+            compare={compare}
+            money={money}
+            t={t}
+            onAddToCart={addToCart}
+            onFavorite={toggleFavorite}
+            onCompare={toggleCompare}
+            onOpenProduct={openProduct}
+            onBack={openStorefront}
+          />
+        )}
+
+        {page === 'musteri' && !productSlug && (
           <Storefront
             products={visibleProducts}
-            allProducts={products}
             categories={categoryOptions}
             category={category}
             query={query}
@@ -263,17 +326,16 @@ function App() {
             favorites={favorites}
             compare={compare}
             selectedCompare={selectedCompare}
-            selectedProductId={selectedProductId}
             checkoutStatus={checkoutStatus}
             money={money}
             t={t}
-            onCategoryChange={setCategory}
+            onCategoryChange={selectCategory}
             onQueryChange={setQuery}
             onSortChange={setSortMode}
             onAddToCart={addToCart}
             onFavorite={toggleFavorite}
             onCompare={toggleCompare}
-            onSelectProduct={setSelectedProductId}
+            onOpenProduct={openProduct}
             onCheckout={checkout}
           />
         )}
@@ -340,7 +402,6 @@ function UseCaseBanner({ path, text }: { path: string; text: string }) {
 
 function Storefront(props: {
   products: Product[]
-  allProducts: Product[]
   categories: string[]
   category: string
   query: string
@@ -350,7 +411,6 @@ function Storefront(props: {
   favorites: string[]
   compare: string[]
   selectedCompare: Product[]
-  selectedProductId: string | null
   checkoutStatus: string
   money: Intl.NumberFormat
   t: Copy
@@ -360,7 +420,7 @@ function Storefront(props: {
   onAddToCart: (product: Product) => void
   onFavorite: (id: string) => void
   onCompare: (id: string) => void
-  onSelectProduct: (id: string | null) => void
+  onOpenProduct: (product: Product) => void
   onCheckout: () => void
 }) {
   const slides = useMemo(() => {
@@ -378,9 +438,6 @@ function Storefront(props: {
   const slide = slides[activeSlide] ?? slides[0]
   const campaignTiles = props.products.slice(4, 8)
   const categoryTiles = props.categories.filter((item) => item !== 'Tumu').slice(0, 5)
-  const selectedProduct =
-    props.allProducts.find((product) => product.id === props.selectedProductId) ??
-    props.products.find((product) => product.id === props.selectedProductId)
 
   useEffect(() => {
     if (slides.length < 2) return
@@ -404,7 +461,7 @@ function Storefront(props: {
               <button type="button" onClick={() => props.onAddToCart(slide.product)}>
                 {slide.cta}
               </button>
-              <button type="button" className="ghost" onClick={() => props.onSelectProduct(slide.product.id)}>
+              <button type="button" className="ghost" onClick={() => props.onOpenProduct(slide.product)}>
                 {props.t.hero.details}
               </button>
               <button type="button" className="ghost" onClick={() => props.onCompare(slide.product.id)}>
@@ -495,24 +552,10 @@ function Storefront(props: {
         </div>
       </section>
 
-      {selectedProduct && (
-        <ProductDetailPanel
-          product={selectedProduct}
-          isFavorite={props.favorites.includes(selectedProduct.id)}
-          isCompared={props.compare.includes(selectedProduct.id)}
-          money={props.money}
-          t={props.t}
-          onAddToCart={props.onAddToCart}
-          onFavorite={props.onFavorite}
-          onCompare={props.onCompare}
-          onClose={() => props.onSelectProduct(null)}
-        />
-      )}
-
       <section className="product-grid">
         {props.products.map((product) => (
           <article className="product-card" key={product.id}>
-            <button type="button" className="product-media" onClick={() => props.onSelectProduct(product.id)}>
+            <button type="button" className="product-media" onClick={() => props.onOpenProduct(product)}>
               <img src={product.image} alt={product.title} />
               <span>{product.type === 'digital' ? props.t.store.digitalDelivery : props.t.store.shipping}</span>
             </button>
@@ -529,7 +572,7 @@ function Storefront(props: {
                 <span>{props.money.format(product.oldPrice)}</span>
               </div>
               <div className="button-row">
-                <button type="button" className="ghost" onClick={() => props.onSelectProduct(product.id)}>
+                <button type="button" className="ghost" onClick={() => props.onOpenProduct(product)}>
                   {props.t.store.detail}
                 </button>
                 <button type="button" onClick={() => props.onAddToCart(product)}>
@@ -583,12 +626,104 @@ function Storefront(props: {
   )
 }
 
+function ProductRoute(props: {
+  product: Product | null | undefined
+  products: Product[]
+  favorites: string[]
+  compare: string[]
+  money: Intl.NumberFormat
+  t: Copy
+  onAddToCart: (product: Product) => void
+  onFavorite: (id: string) => void
+  onCompare: (id: string) => void
+  onOpenProduct: (product: Product) => void
+  onBack: () => void
+}) {
+  if (!props.product) {
+    return (
+      <div className="content-grid">
+        <section className="empty-state full-span">
+          <span className="eyebrow">{props.t.detail.productNotFound}</span>
+          <h2>{props.t.detail.productNotFound}</h2>
+          <p>{props.t.detail.productNotFoundBody}</p>
+          <button type="button" onClick={props.onBack}>
+            {props.t.detail.backToStorefront}
+          </button>
+        </section>
+      </div>
+    )
+  }
+
+  const relatedProducts = props.products
+    .filter((product) => product.id !== props.product?.id && product.category.split('/')[0] === props.product?.category.split('/')[0])
+    .slice(0, 3)
+
+  return (
+    <div className="content-grid product-page-grid">
+      <ProductDetailPanel
+        product={props.product}
+        isFavorite={props.favorites.includes(props.product.id)}
+        isCompared={props.compare.includes(props.product.id)}
+        money={props.money}
+        t={props.t}
+        closeLabel={props.t.detail.backToStorefront}
+        onAddToCart={props.onAddToCart}
+        onFavorite={props.onFavorite}
+        onCompare={props.onCompare}
+        onClose={props.onBack}
+      />
+
+      {relatedProducts.length > 0 && (
+        <section className="related-products full-span">
+          <div className="showcase-band">
+            <div>
+              <span className="eyebrow">{props.t.store.showcaseEyebrow}</span>
+              <h2>{props.t.store.showcaseTitle}</h2>
+            </div>
+          </div>
+          <div className="product-grid compact-grid">
+            {relatedProducts.map((product) => (
+              <article className="product-card" key={product.id}>
+                <button type="button" className="product-media" onClick={() => props.onOpenProduct(product)}>
+                  <img src={product.image} alt={product.title} />
+                  <span>{product.type === 'digital' ? props.t.store.digitalDelivery : props.t.store.shipping}</span>
+                </button>
+                <div className="product-body">
+                  <div className="product-meta">
+                    <span>{displayBadge(product.badge, props.t)}</span>
+                    <strong>{product.rating.toFixed(1)}</strong>
+                  </div>
+                  <h3>{product.title}</h3>
+                  <p>{product.seller}</p>
+                  <div className="price-row">
+                    <strong>{props.money.format(product.price)}</strong>
+                    <span>{props.money.format(product.oldPrice)}</span>
+                  </div>
+                  <div className="button-row">
+                    <button type="button" className="ghost" onClick={() => props.onOpenProduct(product)}>
+                      {props.t.store.detail}
+                    </button>
+                    <button type="button" onClick={() => props.onAddToCart(product)}>
+                      {props.t.store.addToCart}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
 function ProductDetailPanel(props: {
   product: Product
   isFavorite: boolean
   isCompared: boolean
   money: Intl.NumberFormat
   t: Copy
+  closeLabel?: string
   onAddToCart: (product: Product) => void
   onFavorite: (id: string) => void
   onCompare: (id: string) => void
@@ -619,7 +754,7 @@ function ProductDetailPanel(props: {
             <p>{description}</p>
           </div>
           <button type="button" className="ghost" onClick={props.onClose}>
-            {props.t.detail.close}
+            {props.closeLabel ?? props.t.detail.close}
           </button>
         </div>
 
