@@ -18,6 +18,11 @@ New Marketplace mor/lila temalı, çok satıcılı B2C marketplace demosudur. Bu
 
 ## Lokalde Çalıştırma
 
+Gereksinimler:
+
+- Node.js 20+ önerilir
+- npm
+
 ```powershell
 npm install
 npm run dev
@@ -52,6 +57,8 @@ Sol menüde yalnızca müşteri kategorileri görünür. Dashboard route'ları �
 npm run lint
 npm run build
 ```
+
+Bu repoda Python runtime kullanılmaz; bu yüzden `requirements.txt` gerekmez.
 
 ## API Endpointleri
 
