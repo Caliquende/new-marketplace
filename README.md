@@ -18,6 +18,11 @@ Turkish documentation is available in [README_TR.md](./README_TR.md).
 
 ## Local Setup
 
+Requirements:
+
+- Node.js 20+ recommended
+- npm
+
 ```powershell
 npm install
 npm run dev
@@ -52,6 +57,8 @@ Only customer categories are shown in the sidebar. Dashboard routes are intentio
 npm run lint
 npm run build
 ```
+
+No Python runtime is used in this repository, so no `requirements.txt` is needed.
 
 ## API Endpoints
 
