@@ -110,3 +110,12 @@ Genişletme için ana noktalar:
 - Gerçek ödeme, kargo, fatura ve CRM entegrasyonları mock/sandbox olarak ayrılmıştır.
 - Marketplace klonu production'da hukuki/IP riski taşıyabilir. Bu repo iş akışı ve UI demosu olarak teslim edilir.
 - Gizlilik, güvenlik, auditability ve uyumluluk kontrolleri canlıya çıkmadan önce production review gerektirir.
+
+## Güvenlik
+
+Bu proje kapsamlı güvenlik protokollerini takip eder:
+- **Dependabot:** Otomatik bağımlılık ve GitHub Actions güncellemeleri.
+- **CodeQL:** Güvenlik açıklarını tespit etmek için Statik Uygulama Güvenlik Testi (SAST).
+- **Güvenlik Politikası:** [SECURITY.md](./SECURITY.md) dosyasında tanımlanmıştır.
+- **Proaktif Tarama:** CI süreçlerine entegre npm audit, secret scanning ve unsafe JS tespiti.
+

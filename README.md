@@ -110,3 +110,12 @@ Useful extension points:
 - Real payment, shipping, invoice, and CRM integrations are separated as mock/sandbox concerns.
 - A marketplace clone can carry legal/IP risk in production. This repo is delivered as a workflow and UI demo.
 - Privacy, security, auditability, and compliance controls require production review before go-live.
+
+## Security
+
+This project follows robust security protocols:
+- **Dependabot:** Automated dependency and GitHub Actions updates.
+- **CodeQL:** Static Application Security Testing (SAST) to detect vulnerabilities.
+- **Security Policy:** Defined in [SECURITY.md](./SECURITY.md).
+- **Proactive Scanning:** CI includes npm audit, secret scanning, and unsafe JS pattern detection.
+
